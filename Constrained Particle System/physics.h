@@ -9,9 +9,14 @@
 #define _PHYSICS_H_
 #define DISTANCE_FACTOR 5.0
 
-void computeAcceleration(struct world * jello, struct point a[8][8][8]);
 
 void computeAcceleration(struct particleSystem * cps, struct point a[N_particle]);
+
+void printMatrixC(int row, int column, double matrix[][14]);
+void printMatrixT(int row, int column, double matrix[][8]);
+void printMatrixA(int row, int column, double matrix[][22]);
+
+
 
 
 // perform one step of Euler and Runge-Kutta-4th-order integrators
