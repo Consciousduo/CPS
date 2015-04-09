@@ -16,6 +16,7 @@
 #include <gsl/gsl_linalg.h>
 
 
+
 #define pi 3.141592653589793238462643383279 
 #define R_structural  0.142857142857
 #define R_shear_short 0.202030508910
@@ -70,6 +71,7 @@ struct particleSystem
   int n; // display only every nth timepoint
   double mass; // mass of each of particle
   int resolution; // resolution for the 3d grid specifying the external force field; value of 0 means that there is no force field
+  double b; //Baumgarte stabilization
   struct point * forceField; // pointer to the array of values of the force field
   struct point p[N_particle]; // position of particles
   struct point v[N_particle]; // velocities of particles
@@ -78,6 +80,7 @@ struct particleSystem
 extern struct world jello;
 
 void initialCPS();
+void test();
 
 // computes crossproduct of three vectors, which are given as points
 // struct point vector1, vector2, dest

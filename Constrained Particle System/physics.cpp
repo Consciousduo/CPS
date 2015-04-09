@@ -7,15 +7,15 @@
 
 #include "particleSystem.h"
 #include "physics.h"
+#include <gsl/gsl_linalg.h>
+
 
 /* Computes acceleration to every control point of the jello cube, 
    which is in state given by 'jello'.
    Returns result in array 'a'. */
 
 void computeAcceleration(struct particleSystem * cps, struct point a[N_particle]){
-	for(int i=0; i<N_particle; i++){
-		a[i].x=0; a[i].y=0;
-	}
+	
 
 	//construct mass matrix mass_data[row][column]
 	double mass_data[N_particle*2][N_particle*2];
@@ -141,14 +141,100 @@ void computeAcceleration(struct particleSystem * cps, struct point a[N_particle]
 		for(int j=0; j<N_particle*2; j++){
 			temp_sum+=¦¤C_data[i][j]*qp[j];
 		}
-		result[i]=temp_sum;
+		result[i]=-temp_sum;//add the negative sign here
 	}
 	/*
 	for(int i=0; i<N_particle+2; i++){
 		printf("%f\n", result[i]);
+	}
+	*/
+	//Substract Baumgarte Stabilization from result
+	//Construct C
+	double C[N_particle+2];
+	C[0] = cps->p[0].x;
+	C[1] = cps->p[0].y-12;
+	C[N_particle+1] = cps->p[N_particle-1].x*cps->p[N_particle-1].x + cps->p[N_particle-1].y*cps->p[N_particle-1].y - 144;
+	for(int i=2; i<N_particle+1; i++){
+		int k = i-2;
+		double t1 = cps->p[k+1].x-cps->p[k].x;
+		double t2 = cps->p[k+1].y-cps->p[k].y;
+		C[i] = t1*t1+t2*t2-16;
+	} // now we get C
+	/*
+	for(int i=0 ;i<N_particle+2; i++){
+		printf("%f\n", C[i]);
+	}
+	*/
+	//Construc C'
+	double Cp[N_particle+2];
+	Cp[0] = cps->v[0].x;
+	Cp[1] = cps->v[0].y;
+	Cp[N_particle+1] = 2*cps->p[N_particle-1].x*cps->v[N_particle-1].x + 2*cps->p[N_particle-1].y*cps->v[N_particle-1].y;
+	for(int i=2; i<N_particle+1; i++){
+		int k = i-2;
+		Cp[i] = 2*(cps->p[k+1].x-cps->p[k].x)*(cps->v[k+1].x-cps->v[k].x) + 2*(cps->p[k+1].y-cps->p[k].y)*(cps->v[k+1].y-cps->v[k].y);
+	} 
+	/*
+	for(int i=0 ;i<N_particle+2; i++){
+		printf("%f\n", Cp[i]);
 	}*/
+	//Substract Baumgarte Stabilization from result
+	for(int i=0; i<N_particle+2; i++){
+		double b = cps->b;
+		result[i] = result[i] - b*b*C[i] - 2*b*Cp[i];
+	}
 
+	//finally Construct b vector;
+	double B_data[3*N_particle+2];
+	for(int i=0; i<N_particle; i++){
+		B_data[i*2] = 0;
+		B_data[i*2+1] = -1;
+	}
+	for(int i=2*N_particle; i<N_particle*3+2; i++){
+		B_data[i] = result[i-2*N_particle];
+	}
+	//B_data is ready
+	/*
+	for(int i=0; i<3*N_particle+2; i++){
+		printf("%f\n", B_data[i]);
+	}*/
+	double a_data[(3*N_particle+2)*(3*N_particle+2)];
+	for(int i=0; i<(3*N_particle+2); i++){
+		for(int j=0; j<(3*N_particle+2); j++){
+			a_data[i*(3*N_particle+2)+j] = A_data[i][j];
+		}
+	}
 
+	for(int i=0; i<N_particle; i++){
+		a[i].x=0; 
+		a[i].y=0;
+	}
+    
+	  
+	gsl_matrix_view leftSide = gsl_matrix_view_array (a_data, 3*N_particle+2, 3*N_particle+2);
+    gsl_vector_view rightSide = gsl_vector_view_array (B_data, 3*N_particle+2);
+	
+  gsl_vector *x = gsl_vector_alloc (3*N_particle+2);
+  
+  int s;
+
+  gsl_permutation * p = gsl_permutation_alloc (3*N_particle+2);
+
+  gsl_linalg_LU_decomp (&leftSide.matrix, p, &s);
+
+  gsl_linalg_LU_solve (&leftSide.matrix, p, &rightSide.vector, x);
+
+  printf ("x = \n");
+  gsl_vector_fprintf (stdout, x, "%g");
+  
+  for(int i=0; i<N_particle; i++){
+		a[i].x=0; 
+		a[i].y=0;
+	}
+
+  gsl_permutation_free (p);
+  gsl_vector_free (x);
+  
 }
 
 
@@ -156,7 +242,6 @@ void computeAcceleration(struct particleSystem * cps, struct point a[N_particle]
 /* as a result, updates the jello structure */
 void Euler(struct particleSystem * cps)
 {
-  int i,j,k;
   point a[N_particle];
   computeAcceleration(cps, a);
   for(int i=0; i<N_particle; i++){
@@ -215,10 +300,12 @@ void printMatrixA(int row, int column, double matrix[][23])
                       0.14, 0.30, 0.97, 0.66,
                       0.51, 0.13, 0.19, 0.85 };
 
-  double b_data[] = { 1.0, 2.0, 3.0, 4.0 };
+ 
 
   gsl_matrix_view m 
     = gsl_matrix_view_array (a_data, 4, 4);
+
+  double b_data[] = { 1.0, 2.0, 3.0, 4.0 };
 
   gsl_vector_view b
     = gsl_vector_view_array (b_data, 4);
