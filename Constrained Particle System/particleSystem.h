@@ -72,6 +72,7 @@ struct particleSystem
   double mass; // mass of each of particle
   int resolution; // resolution for the 3d grid specifying the external force field; value of 0 means that there is no force field
   double b; //Baumgarte stabilization
+  double vDamping;
   struct point * forceField; // pointer to the array of values of the force field
   struct point p[N_particle]; // position of particles
   struct point v[N_particle]; // velocities of particles

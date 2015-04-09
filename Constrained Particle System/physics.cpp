@@ -158,7 +158,7 @@ void computeAcceleration(struct particleSystem * cps, struct point a[N_particle]
 		int k = i-2;
 		double t1 = cps->p[k+1].x-cps->p[k].x;
 		double t2 = cps->p[k+1].y-cps->p[k].y;
-		C[i] = t1*t1+t2*t2-16;
+		C[i] = t1*t1+t2*t2-16.1;//here we can adjust the distance constrain of each sphere 4.2*4.2
 	} // now we get C
 	/*
 	for(int i=0 ;i<N_particle+2; i++){
@@ -184,11 +184,11 @@ void computeAcceleration(struct particleSystem * cps, struct point a[N_particle]
 		result[i] = result[i] - b*b*C[i] - 2*b*Cp[i];
 	}
 
-	//finally Construct b vector;
+	//finally Construct b vector; //here we add gravity and any other forces
 	double B_data[3*N_particle+2];
 	for(int i=0; i<N_particle; i++){
-		B_data[i*2] = 0;
-		B_data[i*2+1] = -10;
+		B_data[i*2] = 0-cps->vDamping*cps->v[i].x;           //x
+		B_data[i*2+1] = -9.8 - cps->vDamping*cps->v[i].y;;   //y
 	}
 	for(int i=2*N_particle; i<N_particle*3+2; i++){
 		B_data[i] = result[i-2*N_particle];
@@ -211,22 +211,13 @@ void computeAcceleration(struct particleSystem * cps, struct point a[N_particle]
 	}
     
 	  
-	gsl_matrix_view leftSide = gsl_matrix_view_array (a_data, 3*N_particle+2, 3*N_particle+2);
-    gsl_vector_view rightSide = gsl_vector_view_array (B_data, 3*N_particle+2);
-	
-  gsl_vector *x = gsl_vector_alloc (3*N_particle+2);
-  
+  gsl_matrix_view leftSide = gsl_matrix_view_array (a_data, 3*N_particle+2, 3*N_particle+2);
+  gsl_vector_view rightSide = gsl_vector_view_array (B_data, 3*N_particle+2);
+  gsl_vector *x = gsl_vector_alloc (3*N_particle+2); 
   int s;
-
   gsl_permutation * p = gsl_permutation_alloc (3*N_particle+2);
-
   gsl_linalg_LU_decomp (&leftSide.matrix, p, &s);
-
   gsl_linalg_LU_solve (&leftSide.matrix, p, &rightSide.vector, x);
-
-  //printf ("x = \n");
-  //gsl_vector_fprintf (stdout, x, "%g");
-  //printf ("\n");
   
   for(int i=0; i<N_particle; i++){
 	    a[i].x=x->data[i*2]; 
@@ -250,11 +241,7 @@ void Euler(struct particleSystem * cps)
         cps->v[i].y += cps->dt * a[i].y;
 		cps->p[i].x += cps->dt * cps->v[i].x;
         cps->p[i].y += cps->dt * cps->v[i].y;
-  }
-
-  printf("%f  %f\n",  cps->p[6].x, cps->p[6].y);
-  
- 
+  } 
 }
 
 
@@ -294,38 +281,3 @@ void printMatrixA(int row, int column, double matrix[][23])
 	printf("\n");printf("\n");
 }
 
-
-
-//sample useage of Linear System Solver
-/*
-  double a_data[] = { 0.18, 0.60, 0.57, 0.96,
-                      0.41, 0.24, 0.99, 0.58,
-                      0.14, 0.30, 0.97, 0.66,
-                      0.51, 0.13, 0.19, 0.85 };
-
- 
-
-  gsl_matrix_view m 
-    = gsl_matrix_view_array (a_data, 4, 4);
-
-  double b_data[] = { 1.0, 2.0, 3.0, 4.0 };
-
-  gsl_vector_view b
-    = gsl_vector_view_array (b_data, 4);
-
-  gsl_vector *x = gsl_vector_alloc (4);
-  
-  int s;
-
-  gsl_permutation * p = gsl_permutation_alloc (4);
-
-  gsl_linalg_LU_decomp (&m.matrix, p, &s);
-
-  gsl_linalg_LU_solve (&m.matrix, p, &b.vector, x);
-
-  printf ("x = \n");
-  gsl_vector_fprintf (stdout, x, "%g");
-
-  gsl_permutation_free (p);
-  gsl_vector_free (x);
-*/

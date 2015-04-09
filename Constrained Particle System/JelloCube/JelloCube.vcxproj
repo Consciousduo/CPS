@@ -73,6 +73,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\OpenGL\include;C:\Program Files %28x86%29\GnuWin32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -81,6 +82,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>C:\OpenGL\lib;C:\Program Files %28x86%29\GnuWin32\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libgslcblas.a;libgsl.a;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -153,60 +153,7 @@ void readWorld (char * fileName, struct world * jello)
     exit(1);
   }
  
-/* 
 
-  File should first contain a line specifying the integrator (EULER or RK4).
-  Example: EULER
-  
-  Then, follows one line specifying the size of the timestep for the integrator, and
-  an integer parameter n specifying  that every nth timestep will actually be drawn
-  (the other steps will only be used for internal calculation)
-  
-  Example: 0.001 5
-  Now, timestep equals 0.001. Every fifth time point will actually be drawn,
-  i.e. frame1 <--> t = 0
-  frame2 <--> t = 0.005
-  frame3 <--> t = 0.010
-  frame4 <--> t = 0.015
-  ...
-  
-  Then, there should be two lines for physical parameters and external acceleration.
-  Format is:
-    kElastic dElastic kCollision dCollision
-    mass
-  Here
-    kElastic = elastic coefficient of the spring (same for all springs except collision springs)
-    dElastic = damping coefficient of the spring (same for all springs except collision springs)
-    kCollision = elastic coefficient of collision springs (same for all collision springs)
-    dCollision = damping coefficient of collision springs (same for all collision springs)
-    mass = mass in kilograms for each of the 512 mass points 
-    (mass assumed to be the same for all the points; total mass of the jello cube = 512 * mass)
-  
-  Example:
-    10000 25 10000 15
-    0.002
-  
-  Then, there should be one or two lines for the inclined plane, with the obvious syntax. 
-  If there is no inclined plane, there should be only one line with a 0 value. There
-  is no line for the coefficient. Otherwise, there are two lines, first one containing 1,
-  and the second one containing the coefficients.
-  Note: there is no inclined plane in this assignment (always 0).
-  Example:
-    1
-    0.31 -0.78 0.5 5.39
-  
-  Next is the forceField block, first with the resolution and then the data, one point per row.
-  Example:
-    30
-    <here 30 * 30 * 30 = 27 000 lines follow, each containing 3 real numbers>
-  
-  After this, there should be 1024 lines, each containing three floating-point numbers.
-  The first 512 lines correspond to initial point locations.
-  The last 512 lines correspond to initial point velocities.
-  
-  There should no blank lines anywhere in the file.
-
-*/
        
   /* read integrator algorithm */ 
   fscanf(file,"%s\n",&jello->integrator);
