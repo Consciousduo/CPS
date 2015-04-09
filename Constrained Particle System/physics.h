@@ -13,8 +13,8 @@
 void computeAcceleration(struct particleSystem * cps, struct point a[N_particle]);
 
 void printMatrixC(int row, int column, double matrix[][14]);
-void printMatrixT(int row, int column, double matrix[][8]);
-void printMatrixA(int row, int column, double matrix[][22]);
+void printMatrixT(int row, int column, double matrix[][9]);
+void printMatrixA(int row, int column, double matrix[][23]);
 
 
 

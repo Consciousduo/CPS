@@ -17,36 +17,6 @@ void computeAcceleration(struct particleSystem * cps, struct point a[N_particle]
 		a[i].x=0; a[i].y=0;
 	}
 
-/*
-  double a_data[] = { 0.18, 0.60, 0.57, 0.96,
-                      0.41, 0.24, 0.99, 0.58,
-                      0.14, 0.30, 0.97, 0.66,
-                      0.51, 0.13, 0.19, 0.85 };
-
-  double b_data[] = { 1.0, 2.0, 3.0, 4.0 };
-
-  gsl_matrix_view m 
-    = gsl_matrix_view_array (a_data, 4, 4);
-
-  gsl_vector_view b
-    = gsl_vector_view_array (b_data, 4);
-
-  gsl_vector *x = gsl_vector_alloc (4);
-  
-  int s;
-
-  gsl_permutation * p = gsl_permutation_alloc (4);
-
-  gsl_linalg_LU_decomp (&m.matrix, p, &s);
-
-  gsl_linalg_LU_solve (&m.matrix, p, &b.vector, x);
-
-  printf ("x = \n");
-  gsl_vector_fprintf (stdout, x, "%g");
-
-  gsl_permutation_free (p);
-  gsl_vector_free (x);
-*/
 	//construct mass matrix mass_data[row][column]
 	double mass_data[N_particle*2][N_particle*2];
 	for(int i=0; i<N_particle*2; i++){
@@ -58,9 +28,9 @@ void computeAcceleration(struct particleSystem * cps, struct point a[N_particle]
 		}
 	}
 	//construct ¦¤C matrix mass_data[row][column]
-	double ¦¤C_data[N_particle+1][N_particle*2];
+	double ¦¤C_data[N_particle+2][N_particle*2];
 	//construct ¦¤CT matrix mass_data[row][column]
-	double ¦¤CT_data[N_particle*2][N_particle+1];
+	double ¦¤CT_data[N_particle*2][N_particle+2];
 
 	for(int i=0; i<N_particle*2; i++){
 		¦¤C_data[0][i] = 0;
@@ -68,7 +38,7 @@ void computeAcceleration(struct particleSystem * cps, struct point a[N_particle]
 	}
 	¦¤C_data[0][0] = 1; ¦¤C_data[1][1] = 1; 
 
-	for(int i=2; i<N_particle+1; i++){ //2 ~ row
+	for(int i=2; i<N_particle+1; i++){ //row
 		for(int j=0; j<N_particle*2; j++){ //all column
 			int k = i-2;
 			if(j == (i-2)*2){
@@ -88,18 +58,27 @@ void computeAcceleration(struct particleSystem * cps, struct point a[N_particle]
 			}
 		}
 	}
+	//first n+1 row finished
+	for(int i=0; i<N_particle*2; i++){
+		¦¤C_data[N_particle+1][i]=0;
+		if(i==(N_particle*2-2))
+			¦¤C_data[N_particle+1][i]=2*cps->p[N_particle-1].x;
+		if(i==(N_particle*2-1))
+			¦¤C_data[N_particle+1][i]=2*cps->p[N_particle-1].y;
+	}
+	//all row finished
 
 	for(int i=0; i<N_particle*2; i++){
-		for(int j=0; j<N_particle+1; j++){
+		for(int j=0; j<N_particle+2; j++){
 			¦¤CT_data[i][j] = ¦¤C_data[j][i];
 		}
 	}
-	//printMatrixC(N_particle+1, N_particle*2, ¦¤C_data);
-	//printMatrixT(N_particle*2, N_particle+1, ¦¤CT_data);
+	//printMatrixC(N_particle+2, N_particle*2, ¦¤C_data);
+	//printMatrixT(N_particle*2, N_particle+2, ¦¤CT_data);
 	//construct the final matrix
-	double A_data[3*N_particle+1][3*N_particle+1];
-	for(int i=0; i<3*N_particle+1; i++){
-		for(int j=0; j<3*N_particle+1; j++){
+	double A_data[3*N_particle+2][3*N_particle+2];
+	for(int i=0; i<3*N_particle+2; i++){
+		for(int j=0; j<3*N_particle+2; j++){
 			if(i<2*N_particle && j<2*N_particle){
 				A_data[i][j] = mass_data[i][j];
 			}
@@ -115,8 +94,59 @@ void computeAcceleration(struct particleSystem * cps, struct point a[N_particle]
 		}
 	}
 	//A_data finished
-	//printMatrixA(3*N_particle+1, 3*N_particle+1, A_data);
+	//printMatrixA(3*N_particle+2, 3*N_particle+2, A_data);
 
+	//construct dc'/dq matrix, we will reuse ¦¤C_data since they are the same size
+	for(int i=0; i<N_particle+2; i++){
+		for(int j=0; j<N_particle*2; j++){
+			¦¤C_data[i][j] = 0;
+		}
+	}
+	for(int i=2; i<N_particle+1; i++){
+		for(int j=0; j<N_particle*2; j++){
+			int k = i-2;
+			if(j == (i-2)*2){
+				¦¤C_data[i][j] =-2*(cps->v[k+1].x-cps->v[k].x);
+			}
+			else if(j == (i-2)*2+1){
+				¦¤C_data[i][j] =-2*(cps->v[k+1].y-cps->v[k].y);
+			}
+			else if(j == (i-2)*2+2){
+				¦¤C_data[i][j] = 2*(cps->v[k+1].x-cps->v[k].x);
+			}
+			else if(j == (i-2)*2+3){
+				¦¤C_data[i][j] = 2*(cps->v[k+1].y-cps->v[k].y);
+			}
+			else{
+				¦¤C_data[i][j]=0;
+			}
+		}
+	}	
+	¦¤C_data[N_particle+1][N_particle*2-2]=2*cps->v[N_particle-1].x;
+	¦¤C_data[N_particle+1][N_particle*2-1]=2*cps->v[N_particle-1].y;
+	//end of construction of dc'/dq matrix
+	//printMatrixC(N_particle+2, N_particle*2, ¦¤C_data);
+
+	//construct q'
+	double qp[N_particle*2];
+	for(int i=0; i<N_particle; i++){
+		qp[2*i]  = cps->v[i].x;
+		qp[2*i+1]= cps->v[i].x;
+	}
+
+	//construct dc'/dq * q'
+	double result[N_particle+2];
+	for(int i=0; i<N_particle+2; i++){
+		double temp_sum=0;
+		for(int j=0; j<N_particle*2; j++){
+			temp_sum+=¦¤C_data[i][j]*qp[j];
+		}
+		result[i]=temp_sum;
+	}
+	/*
+	for(int i=0; i<N_particle+2; i++){
+		printf("%f\n", result[i]);
+	}*/
 
 
 }
@@ -148,9 +178,11 @@ void printMatrixC(int row, int column, double matrix[][14])
 		}
 		printf("\n");
 	}
+
+	printf("\n");printf("\n");
 }
 
-void printMatrixT(int row, int column, double matrix[][8])
+void printMatrixT(int row, int column, double matrix[][9])
 {
 	for(int i=0; i<row; i++){
 		for(int j=0; j<column; j++){
@@ -158,9 +190,11 @@ void printMatrixT(int row, int column, double matrix[][8])
 		}
 		printf("\n");
 	}
+
+	printf("\n");printf("\n");
 }
 
-void printMatrixA(int row, int column, double matrix[][22])
+void printMatrixA(int row, int column, double matrix[][23])
 {
 	for(int i=0; i<row; i++){
 		for(int j=0; j<column; j++){
@@ -168,4 +202,40 @@ void printMatrixA(int row, int column, double matrix[][22])
 		}
 		printf("\n");
 	}
+
+	printf("\n");printf("\n");
 }
+
+
+
+//sample useage of Linear System Solver
+/*
+  double a_data[] = { 0.18, 0.60, 0.57, 0.96,
+                      0.41, 0.24, 0.99, 0.58,
+                      0.14, 0.30, 0.97, 0.66,
+                      0.51, 0.13, 0.19, 0.85 };
+
+  double b_data[] = { 1.0, 2.0, 3.0, 4.0 };
+
+  gsl_matrix_view m 
+    = gsl_matrix_view_array (a_data, 4, 4);
+
+  gsl_vector_view b
+    = gsl_vector_view_array (b_data, 4);
+
+  gsl_vector *x = gsl_vector_alloc (4);
+  
+  int s;
+
+  gsl_permutation * p = gsl_permutation_alloc (4);
+
+  gsl_linalg_LU_decomp (&m.matrix, p, &s);
+
+  gsl_linalg_LU_solve (&m.matrix, p, &b.vector, x);
+
+  printf ("x = \n");
+  gsl_vector_fprintf (stdout, x, "%g");
+
+  gsl_permutation_free (p);
+  gsl_vector_free (x);
+*/
