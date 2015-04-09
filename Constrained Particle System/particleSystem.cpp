@@ -32,11 +32,11 @@ int windowWidth, windowHeight;
 void initialCPS(){
 	
   cps.integrator = 0;
-  cps.dt = 0.001; // timestep, e.g.. 0.001
+  cps.dt = 0.01; // timestep, e.g.. 0.001
   cps.n = 5; // display only every nth timepoint
   cps.mass = 10; // mass of each of particle
   cps.resolution = 0; // resolution for the 3d grid specifying the external force field; value of 0 means that there is no force field
-  cps.b = 1;
+  cps.b = 10;
   
 	cps.p[0].x=0;  cps.p[0].y=12; cps.p[0].z=0;
 	cps.p[1].x=0;  cps.p[1].y=8;  cps.p[1].z=0;

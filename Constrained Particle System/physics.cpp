@@ -188,7 +188,7 @@ void computeAcceleration(struct particleSystem * cps, struct point a[N_particle]
 	double B_data[3*N_particle+2];
 	for(int i=0; i<N_particle; i++){
 		B_data[i*2] = 0;
-		B_data[i*2+1] = -1;
+		B_data[i*2+1] = -10;
 	}
 	for(int i=2*N_particle; i<N_particle*3+2; i++){
 		B_data[i] = result[i-2*N_particle];
@@ -224,12 +224,13 @@ void computeAcceleration(struct particleSystem * cps, struct point a[N_particle]
 
   gsl_linalg_LU_solve (&leftSide.matrix, p, &rightSide.vector, x);
 
-  printf ("x = \n");
-  gsl_vector_fprintf (stdout, x, "%g");
+  //printf ("x = \n");
+  //gsl_vector_fprintf (stdout, x, "%g");
+  //printf ("\n");
   
   for(int i=0; i<N_particle; i++){
-		a[i].x=0; 
-		a[i].y=0;
+	    a[i].x=x->data[i*2]; 
+		a[i].y=x->data[i*2+1];
 	}
 
   gsl_permutation_free (p);
@@ -250,6 +251,8 @@ void Euler(struct particleSystem * cps)
 		cps->p[i].x += cps->dt * cps->v[i].x;
         cps->p[i].y += cps->dt * cps->v[i].y;
   }
+
+  printf("%f  %f\n",  cps->p[6].x, cps->p[6].y);
   
  
 }
