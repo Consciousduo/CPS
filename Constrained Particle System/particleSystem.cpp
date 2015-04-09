@@ -21,7 +21,7 @@ int g_iLeftMouseButton,g_iMiddleMouseButton,g_iRightMouseButton;
 int sprite=0;
 
 // these variables control what is displayed on screen
-int shear=0, bend=0, structural=1, pause=1, viewingMode=1, saveScreenToFile=0;
+int shear=0, bend=0, structural=1, pause=1, viewingMode=1, saveScreenToFile=1;
 
 struct world jello;
 struct particleSystem cps;
@@ -33,7 +33,7 @@ void initialCPS(){
 	
   cps.integrator = 0;
   cps.dt = 0.005; // timestep, e.g.. 0.005
-  cps.n = 5; // display only every nth timepoint
+  cps.n = 3; // display only every nth timepoint
   cps.mass = 1; // mass of each of particle
   cps.resolution = 0; // resolution for the 3d grid specifying the external force field; value of 0 means that there is no force field
   cps.b = 20;
@@ -224,7 +224,7 @@ void doIdle()
     sprite++;
   }
 
-  if (sprite >= 300) // allow only 300 snapshots
+  if (sprite >= 600) // allow only 300 snapshots
   {
     exit(0);	
   }
@@ -232,8 +232,9 @@ void doIdle()
   if (pause == 0)
   {
     // insert code which appropriately performs one step of the cube simulation:
-	  
+	  for(int i=0; i<cps.n; i++){
 	  Euler(&cps);
+	  }
 	 
   }//end of pause
 

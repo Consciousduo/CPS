@@ -1,4 +1,4 @@
-﻿Build started 4/9/2015 3:15:22 PM.
+﻿Build started 4/9/2015 3:36:41 PM.
      1>Project "F:\Projects\CPS\Constrained Particle System\JelloCube\JelloCube.vcxproj" on node 2 (Build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\ConstrainedParticleSystem.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -20,4 +20,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.79
+Time Elapsed 00:00:00.76
