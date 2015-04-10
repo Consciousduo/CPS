@@ -236,6 +236,11 @@ void Euler(struct particleSystem * cps)
 {
   point a[N_particle];
   computeAcceleration(cps, a);
+  //add interact acceleration
+  for(int i=N_particle-2; i<N_particle; i++){
+	  a[i].x += interact;
+  }
+
   for(int i=0; i<N_particle; i++){
 		cps->v[i].x += cps->dt * a[i].x;
         cps->v[i].y += cps->dt * a[i].y;

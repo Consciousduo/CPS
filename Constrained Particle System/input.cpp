@@ -1,8 +1,5 @@
 /*
-
   USC/Viterbi/Computer Science
-  "Jello Cube" Assignment 1 starter code
-
 */
 
 #include "particleSystem.h"
@@ -58,6 +55,13 @@ void mouseMotionDrag(int x, int y)
     g_vMousePos[0] = x;
     g_vMousePos[1] = y;
   }
+
+  if (g_iLeftMouseButton) // handle interact
+  {
+	interact += vMouseDelta[0]*0.002;
+  }
+  printf("interact: %f\n", interact);
+
 }
 
 void mouseMotion (int x, int y)
@@ -68,6 +72,7 @@ void mouseMotion (int x, int y)
 
 void mouseButton(int button, int state, int x, int y)
 {
+  interact=0;
   switch (button)
   {
     case GLUT_LEFT_BUTTON:

@@ -28,6 +28,7 @@
 extern double Theta;
 extern double Phi;
 extern double R;
+extern double interact;
 
 // number of images saved to disk so far
 extern int sprite;

@@ -11,6 +11,7 @@ Duo Zhao
 double Theta = pi / 2;
 double Phi = 3*pi / 2;
 double R = 25;
+double interact = 0;
 
 // mouse control
 int g_iMenuId;
@@ -21,7 +22,7 @@ int g_iLeftMouseButton,g_iMiddleMouseButton,g_iRightMouseButton;
 int sprite=0;
 
 // these variables control what is displayed on screen
-int shear=0, bend=0, structural=1, pause=1, viewingMode=1, saveScreenToFile=1;
+int shear=0, bend=0, structural=1, pause=1, viewingMode=1, saveScreenToFile=0;
 
 struct world jello;
 struct particleSystem cps;
@@ -30,10 +31,9 @@ struct particleSystem cps;
 int windowWidth, windowHeight;
 
 void initialCPS(){
-	
   cps.integrator = 0;
   cps.dt = 0.005; // timestep, e.g.. 0.005
-  cps.n = 3; // display only every nth timepoint
+  cps.n = 2; // display only every nth timepoint
   cps.mass = 1; // mass of each of particle
   cps.resolution = 0; // resolution for the 3d grid specifying the external force field; value of 0 means that there is no force field
   cps.b = 20;

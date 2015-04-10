@@ -1,8 +1,5 @@
 /*
-
   USC/Viterbi/Computer Science
-  "Jello Cube" Assignment 1 starter code
-
 */
 
 
